@@ -1,0 +1,23 @@
+{
+  "name": "gridledger",
+  "version": "1.0.0",
+  "description": "GridLedger P2P Energy Trading Platform",
+  "private": true,
+  "workspaces": [
+    "contracts",
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "chain": "npm run node --workspace=contracts",
+    "deploy": "npm run deploy --workspace=contracts",
+    "seed": "npm run seed --workspace=contracts",
+    "oracle": "npm run dev --workspace=backend",
+    "api": "npm run start --workspace=backend",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "start:all": "concurrently \"npm run chain\" \"npm run oracle\" \"npm run dev:frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

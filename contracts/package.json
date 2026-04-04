@@ -1,0 +1,16 @@
+{
+  "name": "contracts",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GridLedger Smart Contracts",
+  "scripts": {
+    "node": "hardhat node",
+    "deploy": "hardhat ignition deploy ./ignition/modules/Deploy.js --network sepolia",
+    "test": "hardhat test"
+  },
+  "devDependencies": {
+    "hardhat": "^2.22.2",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/contracts": "^5.0.2"
+  }
+}
