@@ -78,11 +78,11 @@ export default function Help() {
 
         {/* Quick-start banner */}
         <div className="fu d1" style={{ background:'var(--lime)', borderRadius:'var(--r-lg)', padding:'22px 28px', marginBottom:36 }}>
-          <div style={{ fontFamily:'var(--display)', fontWeight:800, fontSize:16, color:'var(--ink)', marginBottom:8 }}>⚡ Quick Start in 3 steps</div>
+          <div style={{ fontFamily:'var(--display)', fontWeight:800, fontSize:16, color:'var(--on-lime)', marginBottom:8 }}>⚡ Quick Start in 3 steps</div>
           <div style={{ display:'flex', gap:32, flexWrap:'wrap' }}>
             {['1. Install MetaMask', '2. Get Sepolia ETH from a faucet', '3. Connect & start trading'].map((s,i)=>(
-              <div key={i} style={{ fontSize:14, fontWeight:600, color:'var(--ink)', display:'flex', alignItems:'center', gap:8 }}>
-                <span style={{ width:22, height:22, borderRadius:'50%', background:'var(--ink)', color:'var(--lime)', display:'inline-flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:700, flexShrink:0 }}>{i+1}</span>
+              <div key={i} style={{ fontSize:14, fontWeight:600, color:'var(--on-lime)', display:'flex', alignItems:'center', gap:8 }}>
+                <span style={{ width:22, height:22, borderRadius:'50%', background:'var(--on-lime)', color:'var(--lime)', display:'inline-flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:700, flexShrink:0 }}>{i+1}</span>
                 {s.slice(3)}
               </div>
             ))}
@@ -105,8 +105,8 @@ export default function Help() {
         {/* Still stuck */}
         <div className="fu d4" style={{ background:'var(--ink)', borderRadius:'var(--r-lg)', padding:'28px 32px', marginTop:8, display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:16 }}>
           <div>
-            <div style={{ fontFamily:'var(--display)', fontWeight:800, fontSize:18, color:'var(--cream)', marginBottom:5 }}>Still have questions?</div>
-            <div style={{ fontSize:14, color:'rgba(232,233,223,0.5)' }}>The project is open-source — you can read the code or open a GitHub issue.</div>
+            <div style={{ fontFamily:'var(--display)', fontWeight:800, fontSize:18, color:'var(--on-ink)', marginBottom:5 }}>Still have questions?</div>
+            <div style={{ fontSize:14, color:'var(--on-ink-sub)' }}>The project is open-source — you can read the code or open a GitHub issue.</div>
           </div>
           <a href="https://github.com/gudapepratik/Gridledger-blockchain" target="_blank" rel="noopener noreferrer"
             className="btn btn-lime" style={{ fontSize:13 }}>

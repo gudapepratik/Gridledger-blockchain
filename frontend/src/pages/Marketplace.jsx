@@ -152,8 +152,8 @@ export default function Marketplace() {
             { l:'Active Listings', v: `${orders.length}` },
           ].map(({l,v},i)=>(
             <div key={i}>
-              <div style={{ fontSize:10, fontWeight:700, color:'rgba(0,31,63,0.5)', textTransform:'uppercase', letterSpacing:'0.08em', marginBottom:3 }}>{l}</div>
-              <div style={{ fontFamily:'var(--display)', fontWeight:800, fontSize:15, color:'var(--ink)' }}>{v}</div>
+              <div style={{ fontSize:10, fontWeight:700, color:'var(--on-lime-sub)', textTransform:'uppercase', letterSpacing:'0.08em', marginBottom:3 }}>{l}</div>
+              <div style={{ fontFamily:'var(--display)', fontWeight:800, fontSize:15, color:'var(--on-lime)' }}>{v}</div>
             </div>
           ))}
         </div>

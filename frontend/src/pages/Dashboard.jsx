@@ -8,11 +8,8 @@ import { useSocket } from '../hooks/useSocket'
 import { getReadings, getReadingStats, getNetworkStats, registerUser } from '../lib/api'
 import { ethers } from 'ethers'
 
-// ── Helpers ──────────────────────────────────────────────────
-const fmtKwh  = (v) => Number(v).toFixed(2)
-const fmtEth  = (v) => Number(ethers.formatEther(v || '0')).toFixed(4)
+const fmtKwh = (v) => Number(v).toFixed(2)
 
-// Build 24-h chart data from reading array
 function buildChartData(readings) {
   const buckets = Array.from({ length: 24 }, (_, h) => ({ h: `${h}:00`, gen: 0, con: 0 }))
   for (const r of readings) {
@@ -27,7 +24,7 @@ const ChartTip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null
   return (
     <div style={{ background:'var(--ink)', borderRadius:10, padding:'8px 14px', minWidth:110 }}>
-      <div style={{ fontSize:11, color:'var(--ink-dim)', marginBottom:3 }}>{label}</div>
+      <div style={{ fontSize:11, color:'var(--on-ink-sub)', marginBottom:3 }}>{label}</div>
       {payload.map((p, i) => (
         <div key={i} style={{ fontSize:13, fontWeight:600, color: i===0?'var(--lime)':'var(--mantis)' }}>
           {p.value} kWh
@@ -43,14 +40,13 @@ export default function Dashboard() {
   const { isConnected, account, truncateAddress, connect } = useWallet()
   const { token } = useContracts()
 
-  const [ertBalance,   setErtBalance]   = useState(null)
-  const [stats,        setStats]        = useState(null)   // { generatedKwh, consumedKwh }
-  const [netStats,     setNetStats]     = useState(null)   // { activeListings, activeTraders, totalTradedKwh }
-  const [chartData,    setChartData]    = useState(buildChartData([]))
-  const [activity,     setActivity]     = useState([])
-  const [loading,      setLoading]      = useState(false)
+  const [ertBalance, setErtBalance] = useState(null)
+  const [stats,      setStats]      = useState(null)
+  const [netStats,   setNetStats]   = useState(null)
+  const [chartData,  setChartData]  = useState(buildChartData([]))
+  const [activity,   setActivity]   = useState([])
+  const [loading,    setLoading]    = useState(false)
 
-  // ── Fetch on-chain ERT balance ──────────────────────────
   const fetchBalance = useCallback(async () => {
     if (!token || !account) return
     try {
@@ -59,13 +55,11 @@ export default function Dashboard() {
     } catch (e) { console.warn('balance fetch err', e) }
   }, [token, account])
 
-  // ── Fetch backend data ──────────────────────────────────
   const fetchData = useCallback(async () => {
     setLoading(true)
     try {
       const [netRes] = await Promise.all([getNetworkStats()])
       if (netRes.success) setNetStats(netRes.data)
-
       if (account) {
         const [statsRes, readingsRes] = await Promise.all([
           getReadingStats(account),
@@ -78,20 +72,18 @@ export default function Dashboard() {
         }
       }
     } catch (e) { console.warn('dashboard fetch err', e) }
-    finally     { setLoading(false) }
+    finally { setLoading(false) }
   }, [account])
 
-  // ── Register user on wallet connect ─────────────────────
   useEffect(() => {
     if (!account) return
-    registerUser(account).catch(() => {}) // fire & forget
+    registerUser(account).catch(() => {})
     fetchData()
     fetchBalance()
   }, [account, fetchData, fetchBalance])
 
-  useEffect(() => { fetchData() }, [])     // network stats on load (no wallet)
+  useEffect(() => { fetchData() }, [])
 
-  // ── Socket live updates ─────────────────────────────────
   useSocket({
     'meter:reading': (r) => {
       if (r.walletAddress?.toLowerCase() !== account?.toLowerCase()) return
@@ -103,14 +95,13 @@ export default function Dashboard() {
         else                         copy[h].con = +(copy[h].con + r.kwhAmount).toFixed(2)
         return copy
       })
-      fetchBalance()   // update ERT balance after each reading
+      fetchBalance()
     },
     'order:created':   () => fetchData(),
     'order:fulfilled': () => { fetchData(); fetchBalance() },
   })
 
-  // ─── Activity tag colour ──────────────────────────────────
-  const tagFor = (type) => type === 'generation' ? 'tag-lime' : 'tag-red'
+  const tagFor   = (type) => type === 'generation' ? 'tag-lime' : 'tag-red'
   const labelFor = (type) => type === 'generation' ? '⚡ Generated' : '🔥 Consumed'
 
   return (
@@ -119,10 +110,10 @@ export default function Dashboard() {
       {/* Ticker */}
       <div className="ticker fu">
         {[
-          { label:'Network',        val:'Sepolia',                                     dot:true },
-          { label:'Total Traded',   val: netStats ? `${netStats.totalTradedKwh} kWh` : '…' },
-          { label:'Active Listings',val: netStats ? String(netStats.activeListings)   : '…' },
-          { label:'Active Traders', val: netStats ? String(netStats.activeTraders)    : '…' },
+          { label: 'Network',         val: 'Sepolia',                                      dot: true },
+          { label: 'Total Traded',    val: netStats ? `${netStats.totalTradedKwh} kWh` : '…' },
+          { label: 'Active Listings', val: netStats ? String(netStats.activeListings)    : '…' },
+          { label: 'Active Traders',  val: netStats ? String(netStats.activeTraders)     : '…' },
         ].map(({ label, val, dot }, i) => (
           <div key={i} className="ticker-item">
             <span className="section-eyebrow">{label}</span>
@@ -144,33 +135,39 @@ export default function Dashboard() {
         <div className="bento bento-hero-top fu"
           style={{ gridTemplateColumns:'1fr 1fr 280px', gridTemplateRows:'190px', marginBottom:10 }}>
 
+          {/* cell-lime: uses --on-lime automatically */}
           <div className="bento-cell cell-lime" style={{ padding:'28px', display:'flex', flexDirection:'column', justifyContent:'space-between' }}>
-            <div className="section-eyebrow" style={{ color:'rgba(0,31,63,0.5)' }}>P2P Energy Trading</div>
+            <div className="section-eyebrow" style={{ color:'var(--on-lime-sub)' }}>P2P Energy Trading</div>
             <div>
-              <h1 style={{ fontSize:38, fontWeight:800, color:'var(--ink)', lineHeight:1.0, letterSpacing:'-0.04em', marginBottom:14 }}>
+              <h1 style={{ fontSize:38, fontWeight:800, lineHeight:1.0, letterSpacing:'-0.04em', marginBottom:14 }}>
                 Trade clean<br/>energy direct.
               </h1>
               {isConnected
-                ? <div style={{ display:'flex', alignItems:'center', gap:7 }}><span className="live-dot"/><span style={{ fontSize:13, fontWeight:600, color:'var(--ink)' }}>{truncateAddress(account)}</span></div>
+                ? <div style={{ display:'flex', alignItems:'center', gap:7 }}>
+                    <span className="live-dot"/>
+                    <span style={{ fontSize:13, fontWeight:600 }}>{truncateAddress(account)}</span>
+                  </div>
                 : <button className="btn btn-ink" onClick={connect} style={{ fontSize:13 }}>Connect Wallet</button>}
             </div>
           </div>
 
+          {/* cell-ink: uses --on-ink automatically */}
           <div className="bento-cell cell-ink d1" style={{ padding:'28px', display:'flex', flexDirection:'column', justifyContent:'space-between' }}>
             <div style={{ display:'flex', justifyContent:'space-between' }}>
-              <span className="section-eyebrow" style={{ color:'rgba(232,233,223,0.45)' }}>Today Generated</span>
+              <span className="section-eyebrow" style={{ color:'var(--on-ink-sub)' }}>Today Generated</span>
               <Zap size={16} color="var(--lime)"/>
             </div>
             <div>
-              <div className="stat-num" style={{ fontSize:46, color:'var(--lime)' }}>
+              <div className="stat-num" style={{ fontSize:46, color:'var(--on-ink-hi)' }}>
                 {isConnected ? (stats ? fmtKwh(stats.generatedKwh) : '…') : '—'}
               </div>
-              <div className="stat-label" style={{ color:'rgba(232,233,223,0.45)' }}>kWh from solar today</div>
+              <div className="stat-label" style={{ color:'var(--on-ink-sub)' }}>kWh from solar today</div>
             </div>
           </div>
 
+          {/* cell-mantis: uses --on-mantis automatically */}
           <div className="bento-cell cell-mantis d2" style={{ padding:'28px', display:'flex', flexDirection:'column', justifyContent:'space-between' }}>
-            <span className="section-eyebrow" style={{ color:'rgba(0,31,63,0.45)' }}>ERT Balance</span>
+            <span className="section-eyebrow" style={{ color:'var(--on-lime-sub)' }}>ERT Balance</span>
             <div>
               <div className="stat-num" style={{ fontSize:40 }}>
                 {isConnected ? (ertBalance !== null ? Number(ertBalance).toFixed(0) : '…') : '—'}
@@ -203,9 +200,9 @@ export default function Dashboard() {
 
           <div className="bento-cell cell-cream d2" style={{ padding:'24px', display:'flex', gap:32, alignItems:'flex-end', flexWrap:'wrap' }}>
             {[
-              { l:'ERT Balance',    v: isConnected && ertBalance !== null ? `${Number(ertBalance).toFixed(0)} ERT` : '—' },
-              { l:'Net Today',      v: isConnected && stats ? `${fmtKwh(stats.generatedKwh - stats.consumedKwh)} kWh` : '—' },
-              { l:'Active Listings',v: netStats ? `${netStats.activeListings}` : '—' },
+              { l:'ERT Balance',     v: isConnected && ertBalance !== null ? `${Number(ertBalance).toFixed(0)} ERT` : '—' },
+              { l:'Net Today',       v: isConnected && stats ? `${fmtKwh(stats.generatedKwh - stats.consumedKwh)} kWh` : '—' },
+              { l:'Active Listings', v: netStats ? `${netStats.activeListings}` : '—' },
             ].map(({ l, v }) => (
               <div key={l}>
                 <div className="stat-num" style={{ fontSize:20 }}>{v}</div>
@@ -214,10 +211,11 @@ export default function Dashboard() {
             ))}
           </div>
 
+          {/* cell-forest: uses --on-forest automatically */}
           <div className="bento-cell cell-forest d3" style={{ padding:'24px', display:'flex', flexDirection:'column', justifyContent:'space-between' }}>
-            <span className="section-eyebrow" style={{ color:'rgba(246,247,237,0.5)' }}>Ready to trade?</span>
+            <span className="section-eyebrow" style={{ color:'var(--on-forest)', opacity:0.55 }}>Ready to trade?</span>
             <div>
-              <div style={{ fontFamily:'var(--display)', fontWeight:700, fontSize:15, color:'#F6F7ED', lineHeight:1.25, marginBottom:12 }}>
+              <div style={{ fontFamily:'var(--display)', fontWeight:700, fontSize:15, lineHeight:1.25, marginBottom:12 }}>
                 Browse open<br/>energy listings
               </div>
               <NavLink to="/marketplace" className="btn btn-lime" style={{ fontSize:12, padding:'7px 14px' }}>
@@ -297,17 +295,14 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Not connected */}
+        {/* Not connected CTA — cell-ink */}
         {!isConnected && (
-          <div className="fu d4" style={{
-            background:'var(--ink)', borderRadius:'var(--r-lg)', marginTop:10,
-            padding:'28px 32px', display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:16
-          }}>
+          <div className="bento-cell cell-ink fu d4" style={{ marginTop:10, padding:'28px 32px', display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:16 }}>
             <div>
-              <div style={{ fontFamily:'var(--display)', fontWeight:800, fontSize:19, color:'var(--cream)', marginBottom:6 }}>
+              <div style={{ fontFamily:'var(--display)', fontWeight:800, fontSize:19, marginBottom:6 }}>
                 Connect your wallet to unlock live data
               </div>
-              <div style={{ fontSize:13, color:'rgba(232,233,223,0.5)' }}>
+              <div style={{ fontSize:13, color:'var(--on-ink-sub)' }}>
                 Balances, readings, and trade history are wallet-specific.
               </div>
             </div>

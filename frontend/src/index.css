@@ -34,6 +34,18 @@
   --ease:       cubic-bezier(0.22, 1, 0.36, 1);
   --ease-back:  cubic-bezier(0.34, 1.56, 0.64, 1);
   --dur:        0.22s;
+
+  /* Semantic on-surface tokens — for text ON coloured cells.
+     --ink flips to light in dark mode so cells using it also flip.
+     These tokens ensure text is always readable on the cell.
+  */
+  --on-ink:       #F6F7ED;
+  --on-ink-sub:   rgba(246,247,237,0.50);
+  --on-ink-hi:    #DBE64C;
+  --on-lime:      #001F3F;
+  --on-lime-sub:  rgba(0,31,63,0.50);
+  --on-forest:    #F6F7ED;
+  --on-mantis:    #001F3F;
 }
 
 /* ═══════════════════════════════════════════════
@@ -56,6 +68,16 @@
   --card-shadow: 0 2px 24px rgba(0,0,0,0.4);
   --text:        #E8E9DF;
   --text-muted:  rgba(232,233,223,0.5);
+
+  /* On-surface tokens for dark mode — ink bg becomes light,
+     so text must become dark to stay readable */
+  --on-ink:       #12140D;
+  --on-ink-sub:   rgba(18,20,13,0.55);
+  --on-ink-hi:    #00804C;
+  --on-lime:      #001F3F;
+  --on-lime-sub:  rgba(0,31,63,0.50);
+  --on-forest:    #0a1a0a;
+  --on-mantis:    #001F3F;
 }
 
 /* ═══════════════════════════════════════════════
@@ -194,12 +216,18 @@ h1,h2,h3,h4 {
 }
 .bento-cell:hover { transform: translateY(-2px); box-shadow: var(--card-shadow); }
 
-.cell-cream  { background: var(--cream); border: 1px solid var(--ink-rule); }
-.cell-paper  { background: var(--paper); border: 1px solid var(--ink-rule); }
-.cell-lime   { background: var(--lime); }
-.cell-ink    { background: var(--ink); }
-.cell-forest { background: var(--forest); }
-.cell-mantis { background: var(--mantis); }
+.cell-cream  { background: var(--cream); border: 1px solid var(--ink-rule); color: var(--text); }
+.cell-paper  { background: var(--paper); border: 1px solid var(--ink-rule); color: var(--text); }
+.cell-lime   { background: var(--lime);   color: var(--on-lime); }
+.cell-ink    { background: var(--ink);    color: var(--on-ink); }
+.cell-forest { background: var(--forest); color: var(--on-forest); }
+.cell-mantis { background: var(--mantis); color: var(--on-mantis); }
+
+/* Headings inside coloured cells should inherit the cell colour */
+.cell-lime   h1,.cell-lime   h2,.cell-lime   h3 { color: var(--on-lime); }
+.cell-ink    h1,.cell-ink    h2,.cell-ink    h3 { color: var(--on-ink); }
+.cell-forest h1,.cell-forest h2,.cell-forest h3 { color: var(--on-forest); }
+.cell-mantis h1,.cell-mantis h2,.cell-mantis h3 { color: var(--on-mantis); }
 
 /* ═══════════════════════════════════════════════
    TAGS / BADGES

@@ -75,11 +75,21 @@ export default function About() {
                   background:'rgba(255,255,255,0.18)',
                   display:'flex', alignItems:'center', justifyContent:'center', marginBottom:12
                 }}>
-                  <Icon size={20} color={bg==='var(--lime)'?'var(--ink)':'#F6F7ED'}/>
+                  <Icon size={20} color={
+                    bg==='var(--lime)'    ? 'var(--on-lime)'   :
+                    bg==='var(--mantis)' ? 'var(--on-mantis)' :
+                    'var(--on-ink)'
+                  }/>
                 </div>
                 <div style={{ fontFamily:'var(--display)', fontWeight:800, fontSize:18,
-                  color: bg==='var(--lime)'?'var(--ink)':'#F6F7ED', marginBottom:8 }}>{title}</div>
-                <p style={{ fontSize:14, lineHeight:1.7, color: bg==='var(--lime)'?'rgba(0,31,63,0.65)':'rgba(246,247,237,0.7)' }}>{body}</p>
+                  color: bg==='var(--lime)'    ? 'var(--on-lime)'   :
+                         bg==='var(--mantis)' ? 'var(--on-mantis)' :
+                         'var(--on-ink)',
+                  marginBottom:8 }}>{title}</div>
+                <p style={{ fontSize:14, lineHeight:1.7,
+                  color: bg==='var(--lime)'    ? 'var(--on-lime-sub)'  :
+                         bg==='var(--mantis)' ? 'var(--on-lime-sub)'  :
+                         'var(--on-ink-sub)' }}>{body}</p>
               </div>
             </div>
           ))}
@@ -87,11 +97,11 @@ export default function About() {
 
         {/* Mission statement */}
         <div className="fu d2" style={{ background:'var(--ink)', borderRadius:'var(--r-xl)', padding:'36px 40px', marginBottom:48 }}>
-          <div className="section-eyebrow" style={{ color:'rgba(232,233,223,0.4)', marginBottom:12 }}>Our Mission</div>
-          <blockquote style={{ fontFamily:'var(--display)', fontWeight:800, fontSize:28, color:'var(--cream)', lineHeight:1.2, letterSpacing:'-0.02em', maxWidth:700, marginBottom:16 }}>
+          <div className="section-eyebrow" style={{ color:'var(--on-ink-sub)', marginBottom:12 }}>Our Mission</div>
+          <blockquote style={{ fontFamily:'var(--display)', fontWeight:800, fontSize:28, color:'var(--on-ink)', lineHeight:1.2, letterSpacing:'-0.02em', maxWidth:700, marginBottom:16 }}>
             "A world where every rooftop battery and solar panel can participate in a fair, open energy economy."
           </blockquote>
-          <p style={{ fontSize:15, color:'rgba(232,233,223,0.55)', lineHeight:1.7, maxWidth:580 }}>
+          <p style={{ fontSize:15, color:'var(--on-ink-sub)', lineHeight:1.7, maxWidth:580 }}>
             GridLedger is built as an open-source reference implementation. All contracts are verified on Etherscan, all source code is on GitHub. There are no tokens for sale, no ICO, no investors. Just infrastructure for the future grid.
           </p>
         </div>

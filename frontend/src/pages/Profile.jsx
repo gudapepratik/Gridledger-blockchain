@@ -87,23 +87,23 @@ export default function Profile() {
 
         {/* Identity card */}
         <div className="fu d1" style={{ background:'var(--ink)', borderRadius:'var(--r-xl)', padding:'28px 32px', marginBottom:10, display:'flex', alignItems:'center', gap:24, flexWrap:'wrap' }}>
-          <div style={{ width:60, height:60, borderRadius:'var(--r-md)', flexShrink:0, background:'var(--lime)', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'var(--display)', fontWeight:800, fontSize:24, color:'var(--ink)' }}>
+          <div style={{ width:60, height:60, borderRadius:'var(--r-md)', flexShrink:0, background:'var(--lime)', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'var(--display)', fontWeight:800, fontSize:24, color:'var(--on-lime)' }}>
             {isConnected && account ? account[2].toUpperCase() : '?'}
           </div>
           <div style={{ flex:1, minWidth:0 }}>
-            <div style={{ fontFamily:'var(--display)', fontWeight:800, fontSize:19, color:'var(--cream)', marginBottom:8 }}>
+            <div style={{ fontFamily:'var(--display)', fontWeight:800, fontSize:19, color:'var(--on-ink)', marginBottom:8 }}>
               {isConnected ? (displayName || 'Anonymous Prosumer') : 'Not Connected'}
             </div>
             {isConnected ? (
               <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
-                <code style={{ fontSize:11, color:'rgba(232,233,223,0.5)', background:'rgba(232,233,223,0.07)', padding:'4px 10px', borderRadius:6, fontFamily:'monospace', overflow:'hidden', textOverflow:'ellipsis', maxWidth:'220px' }}>
+                <code style={{ fontSize:11, color:'var(--on-ink-sub)', background:'rgba(255,255,255,0.1)', padding:'4px 10px', borderRadius:6, fontFamily:'monospace', overflow:'hidden', textOverflow:'ellipsis', maxWidth:'220px' }}>
                   {account}
                 </code>
-                <button className="btn btn-outline" style={{ fontSize:12, padding:'4px 11px', color:'rgba(232,233,223,0.65)', borderColor:'rgba(232,233,223,0.15)' }} onClick={copy}>
+                <button className="btn btn-outline" style={{ fontSize:12, padding:'4px 11px', color:'var(--on-ink-sub)', borderColor:'rgba(255,255,255,0.2)' }} onClick={copy}>
                   <Copy size={11}/> {copied ? 'Copied!' : 'Copy'}
                 </button>
                 <a href={`${EXPLORER}/address/${account}`} target="_blank" rel="noopener noreferrer"
-                  className="btn btn-outline" style={{ fontSize:12, padding:'4px 11px', color:'rgba(232,233,223,0.65)', borderColor:'rgba(232,233,223,0.15)', textDecoration:'none' }}>
+                  className="btn btn-outline" style={{ fontSize:12, padding:'4px 11px', color:'var(--on-ink-sub)', borderColor:'rgba(255,255,255,0.2)', textDecoration:'none' }}>
                   <ExternalLink size={11}/> Etherscan
                 </a>
               </div>
@@ -113,11 +113,11 @@ export default function Profile() {
           </div>
           {isConnected && (
             <div style={{ textAlign:'right', flexShrink:0 }}>
-              <div style={{ fontSize:10, color:'rgba(232,233,223,0.4)', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.07em', marginBottom:5 }}>ERT Balance</div>
-              <div style={{ fontFamily:'var(--display)', fontWeight:800, fontSize:22, color:'var(--lime)' }}>
+              <div style={{ fontSize:10, color:'var(--on-ink-sub)', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.07em', marginBottom:5 }}>ERT Balance</div>
+              <div style={{ fontFamily:'var(--display)', fontWeight:800, fontSize:22, color:'var(--on-ink-hi)' }}>
                 {ertBalance !== null ? Number(ertBalance).toFixed(0) : '…'}
               </div>
-              <div style={{ fontSize:11, color:'rgba(232,233,223,0.4)', marginTop:2 }}>EnergyTokens</div>
+              <div style={{ fontSize:11, color:'var(--on-ink-sub)', marginTop:2 }}>EnergyTokens</div>
             </div>
           )}
         </div>
@@ -126,8 +126,11 @@ export default function Profile() {
         <div className="fu d2 seamless-grid profile-stats" style={{ gridTemplateColumns:'repeat(4,1fr)', marginBottom:20 }}>
           {statItems.map(({l,v,bg},i)=>(
             <div key={i} className="sg-cell" style={{ background:bg }}>
-              <div style={{ fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.07em', color:'var(--ink-dim)', marginBottom:8 }}>{l}</div>
-              <div style={{ fontFamily:'var(--display)', fontWeight:800, fontSize:22, color:'var(--text)' }}>{v}</div>
+              <div style={{ fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.07em',
+                color: bg==='var(--lime)'?'var(--on-lime-sub)':bg==='var(--mantis)'?'var(--on-lime-sub)':'var(--ink-dim)',
+                marginBottom:8 }}>{l}</div>
+              <div style={{ fontFamily:'var(--display)', fontWeight:800, fontSize:22,
+                color: bg==='var(--lime)'?'var(--on-lime)':bg==='var(--mantis)'?'var(--on-mantis)':'var(--text)' }}>{v}</div>
             </div>
           ))}
         </div>
@@ -135,8 +138,8 @@ export default function Profile() {
         {/* Settings */}
         <div className="fu d3" style={{ border:'1px solid var(--ink-rule)', borderRadius:'var(--r-xl)', overflow:'hidden' }}>
           <div style={{ background:'var(--lime)', padding:'18px 28px', borderBottom:'1px solid rgba(0,31,63,0.12)' }}>
-            <div className="section-eyebrow" style={{ color:'rgba(0,31,63,0.5)' }}>Configuration</div>
-            <div style={{ fontFamily:'var(--display)', fontWeight:800, fontSize:18, marginTop:3, color:'var(--ink)' }}>Prosumer Settings</div>
+            <div className="section-eyebrow" style={{ color:'var(--on-lime-sub)' }}>Configuration</div>
+            <div style={{ fontFamily:'var(--display)', fontWeight:800, fontSize:18, marginTop:3, color:'var(--on-lime)' }}>Prosumer Settings</div>
           </div>
           <div style={{ padding:'28px', background:'var(--bg)', display:'flex', flexDirection:'column', gap:20 }}>
             <div>
