@@ -1,0 +1,9 @@
+{
+  "network": "sepolia",
+  "deployedAt": "2026-04-05T12:47:26.853Z",
+  "deployer": "0x5389398A09BC88F3D384CC61Ce583E864aEAece7",
+  "contracts": {
+    "EnergyToken": "0x802685D4bc48B9e7c3641c314B879F8e8840cE79",
+    "Marketplace": "0x7E9Bb799f2d7FB5a7bbe89aeC2f772d0A57AB752"
+  }
+}

@@ -1,23 +1,78 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useWallet } from '../context/WalletContext'
+import { useContracts } from '../hooks/useContracts'
+import { updateUser, registerUser, getReadingStats, getTrades } from '../lib/api'
+import { ethers } from 'ethers'
 import { Copy, ExternalLink } from 'lucide-react'
+import toast from 'react-hot-toast'
+
+const fmtKwh = (v) => Number(v).toFixed(2)
+const fmtEth  = (wei) => (Number(BigInt(wei || '0')) / 1e18).toFixed(4)
+const fmtErt  = (wei) => (Number(BigInt(wei || '0')) / 1e18).toFixed(2)
+const EXPLORER = 'https://sepolia.etherscan.io'
 
 export default function Profile() {
   const { isConnected, account, connect } = useWallet()
+  const { token } = useContracts()
+
+  const [ertBalance,  setErtBalance]  = useState(null)
   const [displayName, setDisplayName] = useState('')
-  const [peakKw, setPeakKw] = useState('5')
-  const [saved, setSaved] = useState(false)
-  const [copied, setCopied] = useState(false)
+  const [peakKw,      setPeakKw]      = useState('5')
+  const [stats,       setStats]       = useState(null)
+  const [tradeStats,  setTradeStats]  = useState({ count:0, ethTotal:'0' })
+  const [saving,      setSaving]      = useState(false)
+  const [copied,      setCopied]      = useState(false)
+
+  const fetchData = useCallback(async () => {
+    if (!account) return
+    try {
+      const [balRaw, statsRes, tradesRes] = await Promise.all([
+        token ? token.balanceOf(account).catch(()=>null) : Promise.resolve(null),
+        getReadingStats(account),
+        getTrades(account, 200),
+      ])
+      if (balRaw !== null) setErtBalance(ethers.formatUnits(balRaw, 18))
+      if (statsRes.success) setStats(statsRes.data)
+      if (tradesRes.success) {
+        const trades = tradesRes.data
+        const ethTotal = trades.reduce((s,t) => s + Number(BigInt(t.ethPaid||'0'))/1e18, 0)
+        setTradeStats({ count: trades.length, ethTotal: ethTotal.toFixed(4) })
+      }
+    } catch (e) { console.warn('profile fetch err', e) }
+  }, [account, token])
+
+  useEffect(() => {
+    if (!account) return
+    registerUser(account).catch(()=>{})
+    fetchData()
+  }, [account, fetchData])
 
   const copy = () => {
-    if (account) { navigator.clipboard.writeText(account); setCopied(true); setTimeout(()=>setCopied(false),2000) }
+    if (!account) return
+    navigator.clipboard.writeText(account)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
-  const stats = [
-    { l:'Total Generated', v:'347.2 kWh', bg:'var(--lime)' },
-    { l:'Total Consumed',  v:'182.8 kWh', bg:'var(--bg)' },
-    { l:'Total Sold',      v:'140 ERT',   bg:'var(--bg)' },
-    { l:'Revenue Earned',  v:'0.168 ETH', bg:'var(--mantis)' },
+  const save = async () => {
+    if (!account) return
+    setSaving(true)
+    try {
+      await updateUser(account, {
+        displayName: displayName || undefined,
+        peakKwCapacity: Number(peakKw),
+      })
+      toast.success('Settings saved')
+    } catch (e) {
+      toast.error('Failed to save settings')
+    } finally { setSaving(false) }
+  }
+
+  const statItems = [
+    { l:'Today Generated', v: isConnected && stats ? `${fmtKwh(stats.generatedKwh)} kWh` : '—', bg:'var(--lime)' },
+    { l:'Today Consumed',  v: isConnected && stats ? `${fmtKwh(stats.consumedKwh)} kWh` : '—',  bg:'var(--bg)' },
+    { l:'Total Trades',    v: isConnected ? String(tradeStats.count) : '—',                       bg:'var(--bg)' },
+    { l:'ETH Traded',      v: isConnected ? `${tradeStats.ethTotal} ETH` : '—',                  bg:'var(--mantis)' },
   ]
 
   return (
@@ -31,20 +86,13 @@ export default function Profile() {
         </div>
 
         {/* Identity card */}
-        <div className="fu d1" style={{
-          background:'var(--ink)', borderRadius:'var(--r-xl)', padding:'28px 32px',
-          marginBottom:10, display:'flex', alignItems:'center', gap:24, flexWrap:'wrap'
-        }}>
-          <div style={{
-            width:60, height:60, borderRadius:'var(--r-md)', flexShrink:0,
-            background:'var(--lime)', display:'flex', alignItems:'center', justifyContent:'center',
-            fontFamily:'var(--display)', fontWeight:800, fontSize:24, color:'var(--ink)'
-          }}>
-            {isConnected&&account ? account[2].toUpperCase() : '?'}
+        <div className="fu d1" style={{ background:'var(--ink)', borderRadius:'var(--r-xl)', padding:'28px 32px', marginBottom:10, display:'flex', alignItems:'center', gap:24, flexWrap:'wrap' }}>
+          <div style={{ width:60, height:60, borderRadius:'var(--r-md)', flexShrink:0, background:'var(--lime)', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'var(--display)', fontWeight:800, fontSize:24, color:'var(--ink)' }}>
+            {isConnected && account ? account[2].toUpperCase() : '?'}
           </div>
           <div style={{ flex:1, minWidth:0 }}>
             <div style={{ fontFamily:'var(--display)', fontWeight:800, fontSize:19, color:'var(--cream)', marginBottom:8 }}>
-              {isConnected?(displayName||'Anonymous Prosumer'):'Not Connected'}
+              {isConnected ? (displayName || 'Anonymous Prosumer') : 'Not Connected'}
             </div>
             {isConnected ? (
               <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
@@ -52,9 +100,9 @@ export default function Profile() {
                   {account}
                 </code>
                 <button className="btn btn-outline" style={{ fontSize:12, padding:'4px 11px', color:'rgba(232,233,223,0.65)', borderColor:'rgba(232,233,223,0.15)' }} onClick={copy}>
-                  <Copy size={11}/> {copied?'Copied!':'Copy'}
+                  <Copy size={11}/> {copied ? 'Copied!' : 'Copy'}
                 </button>
-                <a href={`https://sepolia.etherscan.io/address/${account}`} target="_blank" rel="noopener noreferrer"
+                <a href={`${EXPLORER}/address/${account}`} target="_blank" rel="noopener noreferrer"
                   className="btn btn-outline" style={{ fontSize:12, padding:'4px 11px', color:'rgba(232,233,223,0.65)', borderColor:'rgba(232,233,223,0.15)', textDecoration:'none' }}>
                   <ExternalLink size={11}/> Etherscan
                 </a>
@@ -65,21 +113,21 @@ export default function Profile() {
           </div>
           {isConnected && (
             <div style={{ textAlign:'right', flexShrink:0 }}>
-              <div style={{ fontSize:10, color:'rgba(232,233,223,0.4)', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.07em', marginBottom:5 }}>Status</div>
-              <div style={{ display:'flex', alignItems:'center', gap:7 }}>
-                <span className="live-dot"/>
-                <span style={{ fontFamily:'var(--display)', fontWeight:700, fontSize:13, color:'var(--mantis)' }}>Active Prosumer</span>
+              <div style={{ fontSize:10, color:'rgba(232,233,223,0.4)', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.07em', marginBottom:5 }}>ERT Balance</div>
+              <div style={{ fontFamily:'var(--display)', fontWeight:800, fontSize:22, color:'var(--lime)' }}>
+                {ertBalance !== null ? Number(ertBalance).toFixed(0) : '…'}
               </div>
+              <div style={{ fontSize:11, color:'rgba(232,233,223,0.4)', marginTop:2 }}>EnergyTokens</div>
             </div>
           )}
         </div>
 
-        {/* Stats grid */}
+        {/* Stats */}
         <div className="fu d2 seamless-grid profile-stats" style={{ gridTemplateColumns:'repeat(4,1fr)', marginBottom:20 }}>
-          {stats.map(({l,v,bg},i)=>(
+          {statItems.map(({l,v,bg},i)=>(
             <div key={i} className="sg-cell" style={{ background:bg }}>
               <div style={{ fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.07em', color:'var(--ink-dim)', marginBottom:8 }}>{l}</div>
-              <div style={{ fontFamily:'var(--display)', fontWeight:800, fontSize:22, color:'var(--text)' }}>{isConnected?v:'—'}</div>
+              <div style={{ fontFamily:'var(--display)', fontWeight:800, fontSize:22, color:'var(--text)' }}>{v}</div>
             </div>
           ))}
         </div>
@@ -98,12 +146,12 @@ export default function Profile() {
             <div>
               <label style={{ fontSize:13, fontWeight:600, display:'block', marginBottom:7 }}>Solar Panel Capacity (kW)</label>
               <input className="input" type="number" min="0.5" max="50" step="0.5" value={peakKw} onChange={e=>setPeakKw(e.target.value)} style={{ maxWidth:180 }}/>
-              <div style={{ fontSize:12, color:'var(--ink-dim)', marginTop:6 }}>Controls simulated solar generation per cycle.</div>
+              <div style={{ fontSize:12, color:'var(--ink-dim)', marginTop:6 }}>Controls how much ERT the oracle mints per cycle during daylight hours.</div>
             </div>
             <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-              <button className="btn btn-ink" disabled={!isConnected} onClick={()=>{setSaved(true);setTimeout(()=>setSaved(false),2000)}}
+              <button className="btn btn-ink" disabled={!isConnected || saving} onClick={save}
                 style={{ opacity:!isConnected?0.45:1 }}>
-                {saved?'✓ Saved!':'Save Settings'}
+                {saving ? 'Saving…' : 'Save Settings'}
               </button>
               {!isConnected && <span style={{ fontSize:12, color:'var(--ink-dim)' }}>Connect wallet to save</span>}
             </div>

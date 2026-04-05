@@ -6,10 +6,9 @@ const tradeSchema = new mongoose.Schema({
   buyerAddress: { type: String, required: true, lowercase: true, index: true },
   tokenAmount: { type: String, required: true }, // BigInt string
   ethPaid: { type: String, required: true },     // BigInt string
-  timestamp: { type: Date, required: true, default: Date.now }
-});
+}, { timestamps: true });   // adds createdAt + updatedAt automatically
 
-tradeSchema.index({ sellerAddress: 1, timestamp: -1 });
-tradeSchema.index({ buyerAddress: 1, timestamp: -1 });
+tradeSchema.index({ sellerAddress: 1, createdAt: -1 });
+tradeSchema.index({ buyerAddress: 1, createdAt: -1 });
 
 export const Trade = mongoose.model('Trade', tradeSchema);
