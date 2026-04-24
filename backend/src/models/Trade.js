@@ -6,6 +6,7 @@ const tradeSchema = new mongoose.Schema({
   buyerAddress: { type: String, required: true, lowercase: true, index: true },
   tokenAmount: { type: String, required: true }, // BigInt string
   ethPaid: { type: String, required: true },     // BigInt string
+  txHash: { type: String, unique: true, sparse: true }, // Blockchain transaction ID
 }, { timestamps: true });   // adds createdAt + updatedAt automatically
 
 tradeSchema.index({ sellerAddress: 1, createdAt: -1 });

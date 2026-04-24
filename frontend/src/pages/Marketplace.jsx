@@ -60,7 +60,7 @@ export default function Marketplace() {
     setTxPending(true)
     const toastId = toast.loading('Waiting for MetaMask…')
     try {
-      const tx = await market.buyOrder(buyModal.orderId, tokenWei, { value: ethCost })
+      const tx = await market.fulfillOrder(buyModal.orderId, tokenWei, { value: ethCost })
       toast.loading('Transaction submitted…', { id: toastId })
       await tx.wait()
       toast.success(`Bought ${buyAmt} ERT!`, { id: toastId })

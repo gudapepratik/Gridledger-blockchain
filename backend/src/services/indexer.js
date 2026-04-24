@@ -50,7 +50,8 @@ export const startIndexer = (io) => {
         sellerAddress: order ? order.sellerAddress : 'unknown',
         buyerAddress: buyer,
         tokenAmount: amountFilled.toString(),
-        ethPaid: ethPaid.toString()
+        ethPaid: ethPaid.toString(),
+        txHash: event.log.transactionHash
       });
 
       console.log(`Indexed OrderFulfilled: ${orderId}`);

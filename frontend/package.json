@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.60.1",
     "axios": "^1.14.0",
     "ethers": "^6.11.1",
     "lucide-react": "^1.7.0",
