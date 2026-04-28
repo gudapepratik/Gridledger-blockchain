@@ -26,11 +26,17 @@ export default function Profile() {
   const fetchData = useCallback(async () => {
     if (!account) return
     try {
-      const [balRaw, statsRes, tradesRes] = await Promise.all([
+      const [userRes, balRaw, statsRes, tradesRes] = await Promise.all([
+        registerUser(account).catch(() => null),
         token ? token.balanceOf(account).catch(()=>null) : Promise.resolve(null),
         getReadingStats(account),
         getTrades(account, 200),
       ])
+      // ✅ Populate saved displayName and peakKw from DB on every load
+      if (userRes?.success && userRes.data) {
+        setDisplayName(prev => prev === '' ? (userRes.data.displayName || '') : prev)
+        setPeakKw(prev => prev === '5' ? String(userRes.data.peakKwCapacity || 5) : prev)
+      }
       if (balRaw !== null) setErtBalance(ethers.formatUnits(balRaw, 18))
       if (statsRes.success) setStats(statsRes.data)
       if (tradesRes.success) {
@@ -43,7 +49,6 @@ export default function Profile() {
 
   useEffect(() => {
     if (!account) return
-    registerUser(account).catch(()=>{})
     fetchData()
   }, [account, fetchData])
 

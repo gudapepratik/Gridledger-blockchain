@@ -55,7 +55,7 @@ export default function Marketplace() {
     if (!isCorrectChain) { toast.error('Switch to Sepolia Testnet'); return }
 
     const tokenWei = ethers.parseUnits(buyAmt, 18)
-    const ethCost  = tokenWei * BigInt(buyModal.pricePerToken) / BigInt(1e18)
+    const ethCost  = tokenWei * BigInt(buyModal.pricePerToken) / (10n ** 18n)
 
     setTxPending(true)
     const toastId = toast.loading('Waiting for MetaMask…')

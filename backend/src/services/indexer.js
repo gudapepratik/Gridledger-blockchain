@@ -36,9 +36,14 @@ export const startIndexer = (io) => {
 
   market.on("OrderFulfilled", async (orderId, buyer, amountFilled, ethPaid, event) => {
     try {
+      // In ethers v6, the event listener receives the Log object directly as the
+      // last argument — NOT a wrapper. event.log.transactionHash would throw.
+      const txHash = event?.transactionHash ?? event?.log?.transactionHash ?? null;
+
       const order = await Order.findOne({ orderId: Number(orderId) });
       if (order) {
-        order.filledAmount = (BigInt(order.filledAmount) + BigInt(amountFilled)).toString();
+        const prevFilled = BigInt(order.filledAmount || '0');
+        order.filledAmount = (prevFilled + BigInt(amountFilled)).toString();
         if (BigInt(order.filledAmount) >= BigInt(order.tokenAmount)) {
           order.status = 1; // Filled
         }
@@ -51,13 +56,16 @@ export const startIndexer = (io) => {
         buyerAddress: buyer,
         tokenAmount: amountFilled.toString(),
         ethPaid: ethPaid.toString(),
-        txHash: event.log.transactionHash
+        txHash,
       });
 
       console.log(`Indexed OrderFulfilled: ${orderId}`);
+      // Always emit — even if DB ops above had issues the frontend must update
       io.emit('order:fulfilled', { orderId: Number(orderId), buyer, amountFilled: amountFilled.toString(), ethPaid: ethPaid.toString() });
     } catch(e) {
-      console.error(e);
+      console.error('OrderFulfilled indexer error:', e);
+      // Still emit so frontend refreshes even on DB error
+      io.emit('order:fulfilled', { orderId: Number(orderId), buyer, amountFilled: amountFilled.toString(), ethPaid: ethPaid.toString() });
     }
   });
 
